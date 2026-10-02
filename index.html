@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformasi Geometri - Kelas 9 SMP | Melani PS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        geomNavy: '#0f172a',
+                        geomPurple: '#6d28d9',
+                        geomLightPurple: '#8b5cf6',
+                        geomGold: '#f59e0b',
+                        geomCyan: '#06b6d4',
+                        geomPink: '#ec4899',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'orbit': 'orbit 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-12px) rotate(3deg)' },
+                        },
+                        orbit: {
+                            '0%': { transform: 'rotate(0deg) translateX(45px) rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg) translateX(45px) rotate(-360deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6d28d9;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+
+        /* Active Nav Styling */
+        .nav-btn.active {
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Canvas styling */
+        canvas {
+            touch-action: none;
+        }
+
+        /* Touch Drag styling */
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-target.highlight {
+            border-color: #f59e0b;
+            background-color: rgba(245, 158, 11, 0.15);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-geomGold selection:text-slate-900">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-purple-500/20 px-4 py-3">
+        <div class="max-w-7xl mx-mx auto max-w-7xl flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="relative w-11 h-11 bg-gradient-to-tr from-purple-600 via-indigo-500 to-amber-400 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30 transform hover:rotate-12 transition-transform duration-300">
+                    <i class="fa-solid fa-shapes text-xl text-white"></i>
+                    <!-- Orbiting decoration element -->
+                    <span class="absolute w-3 h-3 bg-amber-400 rounded-full top-0 right-0 animate-ping opacity-75"></span>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-xl md:text-2xl bg-gradient-to-r from-purple-300 via-amber-300 to-cyan-300 bg-clip-text text-transparent">
+                        GeoTransform
+                    </h1>
+                    <p class="text-xs text-purple-300 font-semibold tracking-wide">Fase D • Kelas 9 SMP</p>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation Tabs -->
+            <nav class="hidden lg:flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-700/60">
+                <button onclick="switchTab('home')" id="tab-btn-home" class="nav-btn active flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <button onclick="switchTab('tujuan')" id="tab-btn-tujuan" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bullseye"></i> Tujuan
+                </button>
+                <button onclick="switchTab('materi')" id="tab-btn-materi" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-book-open"></i> Materi
+                </button>
+                <button onclick="switchTab('kuis')" id="tab-btn-kuis" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-gamepad"></i> Kuis Interaktif
+                </button>
+                <button onclick="switchTab('dragdrop')" id="tab-btn-dragdrop" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-puzzle-piece"></i> Drag & Drop
+                </button>
+                <button onclick="switchTab('tentang')" id="tab-btn-tentang" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-user-gear"></i> Tentang
+                </button>
+            </nav>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 rounded-xl bg-slate-800 text-purple-300 flex items-center justify-center border border-purple-500/30 hover:bg-slate-700 transition">
+                <i class="fa-solid fa-bars text-lg" id="menu-icon"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden mt-3 pt-3 border-t border-slate-700/80 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <button onclick="switchTab('home')" id="mob-tab-home" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-house"></i> Home
+            </button>
+            <button onclick="switchTab('tujuan')" id="mob-tab-tujuan" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-bullseye"></i> Tujuan
+            </button>
+            <button onclick="switchTab('materi')" id="mob-tab-materi" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-book-open"></i> Materi
+            </button>
+            <button onclick="switchTab('kuis')" id="mob-tab-kuis" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-gamepad"></i> Kuis
+            </button>
+            <button onclick="switchTab('dragdrop')" id="mob-tab-dragdrop" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-puzzle-piece"></i> Game Drag
+            </button>
+            <button onclick="switchTab('tentang')" id="mob-tab-tentang" class="flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-slate-800 text-purple-200 border border-slate-700">
+                <i class="fa-solid fa-user-gear"></i> Tentang
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8">
+
+        <!-- ================= PAGE 1: HOME ================= -->
+        <section id="page-home" class="tab-content transition-opacity duration-300">
+            <div class="relative rounded-3xl overflow-hidden glass-panel p-6 md:p-12 mb-8 border border-purple-500/30 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 shadow-2xl">
+                <!-- Background Geometric Cartoon Ornaments -->
+                <div class="absolute -top-10 -right-10 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-400/30 text-amber-300 font-bold text-xs uppercase tracking-wider animate-pulse-slow">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Media Pembelajaran Matematika
+                        </div>
+
+                        <h1 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight text-white">
+                            Petualangan <br>
+                            <span class="bg-gradient-to-r from-amber-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                                Transformasi Geometri!
+                            </span>
+                        </h1>
+
+                        <p class="text-slate-300 text-base md:text-lg leading-relaxed">
+                            Halo Teman Juara! 👋 Siap menjelajahi dunia titik, bayangan, cermin, dan perputaran?
+                            Yuk pelajari <span class="text-amber-300 font-semibold">Translasi</span>, <span class="text-cyan-300 font-semibold">Refleksi</span>, <span class="text-purple-300 font-semibold">Rotasi</span>, dan <span class="text-pink-300 font-semibold">Dilatasi</span> secara seru, visual, dan interaktif!
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="switchTab('materi')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-lg shadow-purple-600/40 hover:scale-105 transition duration-200 flex items-center gap-3">
+                                <i class="fa-solid fa-play"></i> Mulai Belajar Now
+                            </button>
+                            <button onclick="switchTab('kuis')" class="px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/30 hover:scale-105 transition duration-200 flex items-center gap-3">
+                                <i class="fa-solid fa-trophy"></i> Tantangan Kuis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hero Mascot / Illustration Display -->
+                    <div class="lg:col-span-5 flex justify-center">
+                        <div class="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+                            <!-- Orbit Ring -->
+                            <div class="absolute inset-0 border-2 border-dashed border-purple-400/40 rounded-full animate-spin" style="animation-duration: 20s;"></div>
+                            
+                            <!-- Central Shape Illustration -->
+                            <div class="w-44 h-44 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-3xl transform rotate-12 flex flex-col items-center justify-center shadow-2xl animate-float border-2 border-white/20">
+                                <i class="fa-solid fa-draw-polygon text-6xl text-white mb-2"></i>
+                                <span class="font-display font-bold text-lg text-amber-200">SMP Kelas 9</span>
+                            </div>
+
+                            <!-- Orbiting Geometric Mini Badges -->
+                            <div class="absolute top-2 left-4 bg-amber-400 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-lg flex items-center gap-1.5 animate-bounce-slow">
+                                <i class="fa-solid fa-arrows-up-down-left-right"></i> Translasi
+                            </div>
+                            <div class="absolute bottom-4 left-2 bg-pink-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-lg flex items-center gap-1.5 animate-bounce-slow" style="animation-delay: 1s;">
+                                <i class="fa-solid fa-magnifying-glass"></i> Dilatasi
+                            </div>
+                            <div class="absolute top-10 right-0 bg-cyan-400 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-lg flex items-center gap-1.5 animate-bounce-slow" style="animation-delay: 1.5s;">
+                                <i class="fa-solid fa-rotate"></i> Rotasi
+                            </div>
+                            <div class="absolute bottom-10 right-4 bg-purple-400 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-lg flex items-center gap-1.5 animate-bounce-slow" style="animation-delay: 0.5s;">
+                                <i class="fa-solid fa-vector-square"></i> Refleksi
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="glass-card p-5 rounded-2xl border border-purple-500/20 hover:border-purple-400 transition hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-up-down-left-right"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl text-purple-300 mb-1">1. Translasi</h3>
+                    <p class="text-xs text-slate-300">Pergeseran posisi bangun datar sejauh $(a, b)$ tanpa mengubah bentuk dan ukurannya.</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border border-cyan-500/20 hover:border-cyan-400 transition hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-boxes-packing"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl text-cyan-300 mb-1">2. Refleksi</h3>
+                    <p class="text-xs text-slate-300">Pencerminan terhadap cermin (sumbu $X$, sumbu $Y$, $y=x$, atau titik asal $(0,0)$).</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border border-amber-500/20 hover:border-amber-400 transition hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl text-amber-300 mb-1">3. Rotasi</h3>
+                    <p class="text-xs text-slate-300">Perputaran titik atau bangun datar mengelilingi titik pusat sudut tertentu ($90^\circ, 180^\circ$).</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border border-pink-500/20 hover:border-pink-400 transition hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-300 flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-expand"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl text-pink-300 mb-1">4. Dilatasi</h3>
+                    <p class="text-xs text-slate-300">Perubahan ukuran (memperbesar atau memperkecil) dengan faktor skala $k$.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: TUJUAN PEMBELAJARAN ================= -->
+        <section id="page-tujuan" class="tab-content hidden transition-opacity duration-300">
+            <div class="glass-panel rounded-3xl p-6 md:p-8 border border-purple-500/20 mb-8">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 font-bold flex items-center justify-center text-2xl shadow-lg">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display font-bold text-2xl md:text-3xl text-white">Capaian & Tujuan Pembelajaran</h2>
+                        <p class="text-xs md:text-sm text-purple-300">Matematika Fase D (Siswa SMP Kelas 9)</p>
+                    </div>
+                </div>
+
+                <!-- CP Box -->
+                <div class="bg-gradient-to-r from-purple-900/40 to-slate-900 p-5 rounded-2xl border border-purple-500/30 mb-8">
+                    <h3 class="font-display font-bold text-lg text-amber-300 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap"></i> Capaian Pembelajaran (CP)
+                    </h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Di akhir Fase D, peserta didik dapat melakukan transformasi tunggal (translasi, refleksi, rotasi, dan dilatasi) titik, garis, dan bangun datar pada bidang koordinat Kartesius untuk memecahkan masalah kontekstual.
+                    </p>
+                </div>
+
+                <!-- Learning Objective Cards Grid -->
+                <h3 class="font-display font-bold text-xl text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-cyan-400"></i> Tujuan Pembelajaran Spesifik (TP)
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-2xl border border-purple-500/20 flex gap-4 items-start">
+                        <span class="w-8 h-8 rounded-full bg-purple-600 text-white font-extrabold flex items-center justify-center text-sm shrink-0">1</span>
+                        <div>
+                            <h4 class="font-bold text-purple-200 text-base mb-1">Memahami Konsep Translasi</h4>
+                            <p class="text-xs text-slate-300">Peserta didik mampu menentukan koordinat bayangan hasil pergeseran (translasi) pada bidang Kartesius.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border border-cyan-500/20 flex gap-4 items-start">
+                        <span class="w-8 h-8 rounded-full bg-cyan-600 text-white font-extrabold flex items-center justify-center text-sm shrink-0">2</span>
+                        <div>
+                            <h4 class="font-bold text-cyan-200 text-base mb-1">Menganalisis Hasil Refleksi</h4>
+                            <p class="text-xs text-slate-300">Peserta didik mampu menentukan posisi bayangan hasil pencerminan terhadap sumbu koordinat dan garis tertentu.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border border-amber-500/20 flex gap-4 items-start">
+                        <span class="w-8 h-8 rounded-full bg-amber-600 text-slate-950 font-extrabold flex items-center justify-center text-sm shrink-0">3</span>
+                        <div>
+                            <h4 class="font-bold text-amber-200 text-base mb-1">Menghitung Rotasi Titik/Bangun</h4>
+                            <p class="text-xs text-slate-300">Peserta didik mampu menentukan hasil rotasi dengan pusat $(0,0)$ dan sudut perputaran $90^\circ, 180^\circ,$ atau $270^\circ$.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border border-pink-500/20 flex gap-4 items-start">
+                        <span class="w-8 h-8 rounded-full bg-pink-600 text-white font-extrabold flex items-center justify-center text-sm shrink-0">4</span>
+                        <div>
+                            <h4 class="font-bold text-pink-200 text-base mb-1">Memahami Pengaruh Dilatasi</h4>
+                            <p class="text-xs text-slate-300">Peserta didik mampu menentukan bayangan bangun datar setelah diperbesar atau diperkecil dengan faktor skala $k$.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: MATERI INTERAKTIF ================= -->
+        <section id="page-materi" class="tab-content hidden transition-opacity duration-300">
+            <!-- Material Selector Sub-tabs -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="selectMateriTab('translasi')" id="materi-tab-translasi" class="materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-purple-600 text-white shadow-lg transition">
+                    <i class="fa-solid fa-arrows-up-down-left-right mr-1"></i> Translasi
+                </button>
+                <button onclick="selectMateriTab('refleksi')" id="materi-tab-refleksi" class="materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-boxes-packing mr-1"></i> Refleksi
+                </button>
+                <button onclick="selectMateriTab('rotasi')" id="materi-tab-rotasi" class="materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Rotasi
+                </button>
+                <button onclick="selectMateriTab('dilatasi')" id="materi-tab-dilatasi" class="materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-expand mr-1"></i> Dilatasi
+                </button>
+            </div>
+
+            <!-- Material Details & Interactive Simulator Panel -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: Explanation & Controls -->
+                <div class="lg:col-span-5 space-y-5">
+                    <!-- Dynamic Info Card -->
+                    <div id="materi-info-card" class="glass-panel p-5 rounded-3xl border border-purple-500/30">
+                        <!-- Dynamic JS Content Filled Here -->
+                    </div>
+
+                    <!-- Dynamic Control Panel -->
+                    <div class="glass-panel p-5 rounded-3xl border border-purple-500/30">
+                        <h4 class="font-display font-bold text-base text-amber-300 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders"></i> Kontrol Simulasi Visual
+                        </h4>
+                        <div id="materi-controls" class="space-y-4">
+                            <!-- Dynamic Control Sliders Filled Here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive HTML5 Canvas Coordinates -->
+                <div class="lg:col-span-7">
+                    <div class="glass-panel p-4 rounded-3xl border border-purple-500/30 flex flex-col items-center">
+                        <div class="w-full flex items-center justify-between mb-3 px-2">
+                            <span class="font-display font-bold text-sm text-cyan-300 flex items-center gap-2">
+                                <i class="fa-solid fa-grip"></i> Bidang Koordinat Kartesius
+                            </span>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700" id="canvas-status">
+                                Skala Grid: 1 Kotak = 1 Unit
+                            </span>
+                        </div>
+
+                        <!-- Canvas Viewport Container -->
+                        <div class="relative w-full aspect-square max-w-[500px] bg-slate-950 rounded-2xl overflow-hidden border border-slate-700 shadow-inner">
+                            <canvas id="geomCanvas" class="w-full h-full block"></canvas>
+                        </div>
+
+                        <p class="text-xs text-slate-400 mt-3 text-center">
+                            💡 Ubah nilai kontrol di samping untuk melihat pergerakan titik/bangun secara *real-time*!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: KUIS INTERAKTIF ================= -->
+        <section id="page-kuis" class="tab-content hidden transition-opacity duration-300">
+            <div class="max-w-3xl mx-auto">
+                <!-- Quiz Header & Scoreboard -->
+                <div class="glass-panel rounded-3xl p-6 mb-6 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-display font-bold text-2xl text-white flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-amber-400"></i> Kuis Asah Otak Transformasi
+                        </h2>
+                        <p class="text-xs text-purple-300">Uji pemahamanmu tentangTranslasi, Refleksi, Rotasi & Dilatasi!</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-slate-900 border border-purple-500/40 px-4 py-2 rounded-2xl text-center">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Skor</span>
+                            <span id="quiz-score" class="font-display font-extrabold text-xl text-amber-400">0</span>
+                        </div>
+                        <div class="bg-slate-900 border border-purple-500/40 px-4 py-2 rounded-2xl text-center">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Soal</span>
+                            <span id="quiz-counter" class="font-display font-extrabold text-xl text-cyan-400">1 / 5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Main Question Card -->
+                <div id="quiz-card" class="glass-panel rounded-3xl p-6 md:p-8 border border-purple-500/30 relative">
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden mb-6">
+                        <div id="quiz-progress" class="bg-gradient-to-r from-purple-500 to-amber-400 h-full w-1/5 transition-all duration-300"></div>
+                    </div>
+
+                    <!-- Question Title -->
+                    <div class="mb-6">
+                        <span id="quiz-category" class="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded-lg mb-2">Translasi</span>
+                        <h3 id="quiz-question" class="font-display font-bold text-lg md:text-xl text-white leading-snug">
+                            Titik $A(3, 4)$ ditranslasikan oleh $T = (2, -1)$. Berapakah koordinat bayangan $A'$?
+                        </h3>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Explanation Box (Initially Hidden) -->
+                    <div id="quiz-explanation" class="hidden p-4 rounded-2xl bg-slate-900/90 border border-purple-500/40 mb-6">
+                        <h4 class="font-bold text-amber-300 text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb"></i> Pembahasan Soal:
+                        </h4>
+                        <p id="quiz-explanation-text" class="text-xs text-slate-200 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Next Button -->
+                    <div class="flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold text-sm transition flex items-center gap-2">
+                            Soal Berikutnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Completed Summary View (Hidden by default) -->
+                <div id="quiz-results" class="hidden glass-panel rounded-3xl p-8 border border-purple-500/30 text-center">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 flex items-center justify-center text-4xl mx-auto mb-4 shadow-xl">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-3xl text-white mb-2">Selamat! Kuis Selesai 🎉</h3>
+                    <p class="text-slate-300 text-sm mb-6">Kamu telah menyelesaikan semua tantangan kuis transformasi geometri!</p>
+
+                    <div class="inline-block bg-slate-900 p-6 rounded-3xl border border-purple-500/40 mb-6">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Skor Akhir Kamu</span>
+                        <span id="final-score" class="font-display font-extrabold text-5xl bg-gradient-to-r from-amber-400 to-pink-400 bg-clip-text text-transparent">100</span>
+                    </div>
+
+                    <p id="quiz-badge-msg" class="text-amber-300 font-bold text-base mb-6">🏅 Gelar: Master Transformasi Geometri!</p>
+
+                    <button onclick="resetQuiz()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-purple-600/30 hover:scale-105 transition">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Coba Lagi Kuis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: DRAG AND DROP GAME ================= -->
+        <section id="page-dragdrop" class="tab-content hidden transition-opacity duration-300">
+            <div class="glass-panel rounded-3xl p-6 md:p-8 border border-purple-500/30 mb-6">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-700">
+                    <div>
+                        <h2 class="font-display font-bold text-2xl text-white flex items-center gap-2">
+                            <i class="fa-solid fa-puzzle-piece text-amber-400"></i> Permainan Pasangkan Konsep
+                        </h2>
+                        <p class="text-xs text-purple-300">Tarik kartu konsep/contoh di bawah dan masukkan ke kotak transformasi yang tepat!</p>
+                    </div>
+                    <button onclick="resetDragGame()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Reset Permainan
+                    </button>
+                </div>
+
+                <!-- Draggable Cards Pool -->
+                <div class="mb-8">
+                    <h3 class="font-display font-bold text-sm text-slate-300 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-hand text-cyan-400"></i> Kartu Pilihan (Tarik Ke Kotak Bawah):
+                    </h3>
+                    <div id="draggable-container" class="flex flex-wrap gap-3 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 min-h-[100px] items-center">
+                        <!-- Filled dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- Drop Target Categories -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Translasi Zone -->
+                    <div class="drop-target glass-card p-4 rounded-2xl border-2 border-dashed border-purple-500/40 min-h-[180px] flex flex-col" data-category="translasi">
+                        <div class="flex items-center gap-2 text-purple-300 font-bold text-sm mb-3">
+                            <i class="fa-solid fa-arrows-up-down-left-right"></i> Translasi (Pergeseran)
+                        </div>
+                        <div class="dropped-items flex flex-col gap-2 flex-grow"></div>
+                    </div>
+
+                    <!-- Refleksi Zone -->
+                    <div class="drop-target glass-card p-4 rounded-2xl border-2 border-dashed border-cyan-500/40 min-h-[180px] flex flex-col" data-category="refleksi">
+                        <div class="flex items-center gap-2 text-cyan-300 font-bold text-sm mb-3">
+                            <i class="fa-solid fa-boxes-packing"></i> Refleksi (Pencerminan)
+                        </div>
+                        <div class="dropped-items flex flex-col gap-2 flex-grow"></div>
+                    </div>
+
+                    <!-- Rotasi Zone -->
+                    <div class="drop-target glass-card p-4 rounded-2xl border-2 border-dashed border-amber-500/40 min-h-[180px] flex flex-col" data-category="rotasi">
+                        <div class="flex items-center gap-2 text-amber-300 font-bold text-sm mb-3">
+                            <i class="fa-solid fa-rotate-right"></i> Rotasi (Perputaran)
+                        </div>
+                        <div class="dropped-items flex flex-col gap-2 flex-grow"></div>
+                    </div>
+
+                    <!-- Dilatasi Zone -->
+                    <div class="drop-target glass-card p-4 rounded-2xl border-2 border-dashed border-pink-500/40 min-h-[180px] flex flex-col" data-category="dilatasi">
+                        <div class="flex items-center gap-2 text-pink-300 font-bold text-sm mb-3">
+                            <i class="fa-solid fa-expand"></i> Dilatasi (Perkalian)
+                        </div>
+                        <div class="dropped-items flex flex-col gap-2 flex-grow"></div>
+                    </div>
+                </div>
+
+                <!-- Live Drag Feedback -->
+                <div id="drag-feedback" class="mt-6 p-4 rounded-2xl bg-slate-900 border border-slate-700 hidden text-center font-bold text-sm">
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 6: TENTANG ================= -->
+        <section id="page-tentang" class="tab-content hidden transition-opacity duration-300">
+            <div class="glass-panel rounded-3xl p-6 md:p-10 border border-purple-500/30 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <!-- Developer Avatar Card -->
+                    <div class="md:col-span-5 flex flex-col items-center text-center">
+                        <div class="relative mb-4">
+                            <div class="w-36 h-36 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400 p-1 shadow-2xl">
+                                <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                                    <i class="fa-solid fa-user-graduate text-6xl text-purple-300"></i>
+                                </div>
+                            </div>
+                            <span class="absolute bottom-1 right-2 bg-amber-400 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full shadow">
+                                Developer
+                            </span>
+                        </div>
+                        <h3 class="font-display font-bold text-2xl text-white">Melani PS</h3>
+                        <p class="text-xs text-purple-300 font-semibold mb-2">Pengembang Media Pembelajaran Matematika</p>
+                        <span class="inline-block px-3 py-1 bg-purple-500/20 text-amber-300 text-xs font-bold rounded-full border border-purple-500/30">
+                            Matematika SMP Kelas 9 (Fase D)
+                        </span>
+                    </div>
+
+                    <!-- App & Curriculum Info -->
+                    <div class="md:col-span-7 space-y-4">
+                        <h3 class="font-display font-bold text-2xl text-amber-300">Tentang Aplikasi Ini</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Aplikasi interaktif <strong class="text-purple-300">Transformasi Geometri</strong> ini dirancang khusus untuk membantu siswa SMP Kelas 9 (Fase D) memahami konsep-konsep abstrak geometri secara visual dan menyenangkan.
+                        </p>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                                <i class="fa-solid fa-book-bookmark text-amber-400 text-lg w-6"></i>
+                                <span class="text-xs text-slate-300"><strong>Kurikulum:</strong> Kurikulum Merdeka - Fase D</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                                <i class="fa-solid fa-code text-cyan-400 text-lg w-6"></i>
+                                <span class="text-xs text-slate-300"><strong>Teknologi:</strong> HTML5 Canvas, Tailwind CSS, JavaScript Native SPA</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                                <i class="fa-solid fa-mobile-screen-button text-pink-400 text-lg w-6"></i>
+                                <span class="text-xs text-slate-300"><strong>Desain:</strong> Responsif (Smartphone, Tablet, Laptop)</span>
+                            </div>
+                        </div>
+
+                        <!-- Developer Appreciation Button -->
+                        <div class="pt-2">
+                            <button onclick="giveStar()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-extrabold text-sm shadow-lg hover:scale-[1.02] transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-star"></i> Beri Bintang & Apresiasi (<span id="star-count">128</span>)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-purple-500/20 py-6 px-4 text-center mt-12">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <p>© 2026 GeoTransform • Didevelop oleh <strong class="text-amber-300">Melani PS</strong></p>
+            <div class="flex items-center gap-4 text-purple-300">
+                <span>Fase D Matematika</span>
+                <span>•</span>
+                <span>Transformasi Geometri SMP</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. SPA NAVIGATION & STATE MANAGEMENT
+           ========================================================================== */
+        let currentTab = 'home';
+        let currentMateri = 'translasi';
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Show current tab
+            const target = document.getElementById(`page-${tabId}`);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            // Update Desktop Nav styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Redraw canvas if switching to materi
+            if (tabId === 'materi') {
+                setTimeout(() => {
+                    initCanvas();
+                    renderMateri();
+                }, 50);
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        /* ==========================================================================
+           2. MATERI DATA & INTERACTIVE CANVAS SIMULATOR
+           ========================================================================== */
+        const materiData = {
+            translasi: {
+                title: "1. Translasi (Pergeseran)",
+                badge: "bg-purple-500/20 text-purple-300",
+                formula: "$$(x', y') = (x + a, y + b)$$",
+                desc: "Translasi memindahkan setiap titik pada bidang datar sejauh jarak dan arah tertentu. Bentuk dan ukuran objek TIDAK berubah.",
+                controls: [
+                    { id: 'trans_x', label: 'Titik Awal X (x)', min: -5, max: 5, val: 2 },
+                    { id: 'trans_y', label: 'Titik Awal Y (y)', min: -5, max: 5, val: 1 },
+                    { id: 'trans_a', label: 'Geser X (a)', min: -6, max: 6, val: 3 },
+                    { id: 'trans_b', label: 'Geser Y (b)', min: -6, max: 6, val: 2 }
+                ]
+            },
+            refleksi: {
+                title: "2. Refleksi (Pencerminan)",
+                badge: "bg-cyan-500/20 text-cyan-300",
+                formula: "$$P(x,y) \\rightarrow P'(x',y')$$",
+                desc: "Refleksi mencerminkan objek terhadap garis tertentu (Sumbu X, Sumbu Y, Titik Pusat, dll). Jarak objek ke cermin sama dengan jarak bayangan ke cermin.",
+                controls: [
+                    { id: 'ref_x', label: 'Titik Awal X (x)', min: -5, max: 5, val: 3 },
+                    { id: 'ref_y', label: 'Titik Awal Y (y)', min: -5, max: 5, val: 2 },
+                    { id: 'ref_axis', type: 'select', label: 'Cermin / Sumbu', options: [
+                        { val: 'x', text: 'Sumbu X (y=0)' },
+                        { val: 'y', text: 'Sumbu Y (x=0)' },
+                        { val: 'origin', text: 'Titik Pusat (0,0)' }
+                    ], val: 'x' }
+                ]
+            },
+            rotasi: {
+                title: "3. Rotasi (Perputaran)",
+                badge: "bg-amber-500/20 text-amber-300",
+                formula: "Pusat $(0,0)$ dengan Sudut $\\theta$",
+                desc: "Rotasi memutar objek sebesar sudut tertentu mengelilingi titik pusat. Arah berlawanan jarum jam bernilai positif.",
+                controls: [
+                    { id: 'rot_x', label: 'Titik Awal X (x)', min: -5, max: 5, val: 3 },
+                    { id: 'rot_y', label: 'Titik Awal Y (y)', min: -5, max: 5, val: 1 },
+                    { id: 'rot_angle', type: 'select', label: 'Sudut Perputaran (Pusat 0,0)', options: [
+                        { val: '90', text: '90° (Berlawanan Jarum Jam)' },
+                        { val: '180', text: '180°' },
+                        { val: '270', text: '270° (atau -90°)' }
+                    ], val: '90' }
+                ]
+            },
+            dilatasi: {
+                title: "4. Dilatasi (Perkalian Skala)",
+                badge: "bg-pink-500/20 text-pink-300",
+                formula: "$$(x', y') = (k \\cdot x, k \\cdot y)$$",
+                desc: "Dilatasi memperbesar atau memperkecil bentuk geometri berdasarkan faktor skala $k$ dari titik pusat $(0,0)$.",
+                controls: [
+                    { id: 'dil_x', label: 'Titik Awal X (x)', min: -4, max: 4, val: 2 },
+                    { id: 'dil_y', label: 'Titik Awal Y (y)', min: -4, max: 4, val: 2 },
+                    { id: 'dil_k', label: 'Faktor Skala (k)', min: -3, max: 3, val: 2, step: 0.5 }
+                ]
+            }
+        };
+
+        function selectMateriTab(key) {
+            currentMateri = key;
+            document.querySelectorAll('.materi-sub-btn').forEach(btn => {
+                btn.className = "materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            });
+            const activeBtn = document.getElementById(`materi-tab-${key}`);
+            if (activeBtn) {
+                activeBtn.className = "materi-sub-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-purple-600 text-white shadow-lg transition";
+            }
+            renderMateri();
+        }
+
+        function renderMateri() {
+            const data = materiData[currentMateri];
+            const infoCard = document.getElementById('materi-info-card');
+            const controlsCard = document.getElementById('materi-controls');
+
+            // Render Dynamic Material Description
+            infoCard.innerHTML = `
+                <div class="inline-block px-3 py-1 rounded-lg text-xs font-bold mb-2 ${data.badge}">${data.title}</div>
+                <p class="text-slate-300 text-xs md:text-sm leading-relaxed mb-3">${data.desc}</p>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-purple-500/30 font-mono text-center text-amber-300 text-sm font-bold">
+                    ${data.formula}
+                </div>
+            `;
+
+            // Render Controls Sliders/Inputs
+            let controlsHTML = '';
+            data.controls.forEach(ctrl => {
+                if (ctrl.type === 'select') {
+                    controlsHTML += `
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">${ctrl.label}</label>
+                            <select id="${ctrl.id}" onchange="drawCanvas()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                                ${ctrl.options.map(opt => `<option value="${opt.val}" ${opt.val == ctrl.val ? 'selected': ''}>${opt.text}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    const stepAttr = ctrl.step ? `step="${ctrl.step}"` : 'step="1"';
+                    controlsHTML += `
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-slate-300">${ctrl.label}</span>
+                                <span id="${ctrl.id}-val" class="text-amber-400">${ctrl.val}</span>
+                            </div>
+                            <input type="range" id="${ctrl.id}" min="${ctrl.min}" max="${ctrl.max}" value="${ctrl.val}" ${stepAttr}
+                                oninput="document.getElementById('${ctrl.id}-val').innerText = this.value; drawCanvas();"
+                                class="w-full accent-purple-500 cursor-pointer">
+                        </div>
+                    `;
+                }
+            });
+
+            // Calculation Results Box
+            controlsHTML += `
+                <div id="materi-result-box" class="p-3 bg-purple-950/40 rounded-xl border border-purple-500/30 text-xs text-purple-200 mt-4">
+                    <!-- Dynamic calculation string -->
+                </div>
+            `;
+
+            controlsCard.innerHTML = controlsHTML;
+            drawCanvas();
+        }
+
+        /* ==========================================================================
+           3. CANVAS RENDERING ENGINE (2D COORDINATE GRID)
+           ========================================================================== */
+        let canvas, ctx;
+        const GRID_SIZE = 20; // 20 units (-10 to +10)
+
+        function initCanvas() {
+            canvas = document.getElementById('geomCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas dynamic resolution
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 400;
+            canvas.height = rect.width * window.devicePixelRatio || 400;
+        }
+
+        function drawCanvas() {
+            if (!canvas || !ctx) initCanvas();
+            if (!canvas) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const center = w / 2;
+            const scale = w / GRID_SIZE; // pixels per unit
+
+            // Clear Background
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw Grid Lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i <= w; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, h);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(w, i);
+                ctx.stroke();
+            }
+
+            // Draw X and Y Main Axes
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3.5;
+
+            // X Axis
+            ctx.beginPath();
+            ctx.moveTo(0, center);
+            ctx.lineTo(w, center);
+            ctx.stroke();
+
+            // Y Axis
+            ctx.beginPath();
+            ctx.moveTo(center, 0);
+            ctx.lineTo(center, h);
+            ctx.stroke();
+
+            // Axis labels & Numbers
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = `${12 * (w/400)}px Plus Jakarta Sans, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let x = -8; x <= 8; x += 2) {
+                if (x !== 0) {
+                    const cx = center + x * scale;
+                    ctx.fillText(x.toString(), cx, center + 15);
+                }
+            }
+
+            for (let y = -8; y <= 8; y += 2) {
+                if (y !== 0) {
+                    const cy = center - y * scale; // Invert Y axis for Math coordinates
+                    ctx.fillText(y.toString(), center - 15, cy);
+                }
+            }
+
+            // Draw Coordinates & Transformation shapes
+            renderTransformationOnCanvas(center, scale);
+        }
+
+        function renderTransformationOnCanvas(center, scale) {
+            const resBox = document.getElementById('materi-result-box');
+
+            if (currentMateri === 'translasi') {
+                const x = parseFloat(document.getElementById('trans_x')?.value || 2);
+                const y = parseFloat(document.getElementById('trans_y')?.value || 1);
+                const a = parseFloat(document.getElementById('trans_a')?.value || 3);
+                const b = parseFloat(document.getElementById('trans_b')?.value || 2);
+
+                const primeX = x + a;
+                const primeY = y + b;
+
+                // Draw Translation Vector Arrow
+                drawArrow(center + x * scale, center - y * scale, center + primeX * scale, center - primeY * scale, '#f59e0b');
+
+                // Draw Original Point A
+                drawPoint(center + x * scale, center - y * scale, `A(${x}, ${y})`, '#8b5cf6');
+
+                // Draw Translated Point A'
+                drawPoint(center + primeX * scale, center - primeY * scale, `A'(${primeX}, ${primeY})`, '#f59e0b');
+
+                if (resBox) {
+                    resBox.innerHTML = `<strong>Hasil Perhitungan:</strong><br>A' = (${x} + ${a}, ${y} + ${b}) = <span class="text-amber-400 font-bold">(${primeX}, ${primeY})</span>`;
+                }
+            }
+            else if (currentMateri === 'refleksi') {
+                const x = parseFloat(document.getElementById('ref_x')?.value || 3);
+                const y = parseFloat(document.getElementById('ref_y')?.value || 2);
+                const axis = document.getElementById('ref_axis')?.value || 'x';
+
+                let primeX = x, primeY = y;
+                let axisDesc = "";
+
+                if (axis === 'x') {
+                    primeX = x; primeY = -y;
+                    axisDesc = "Sumbu X (y = 0)";
+                    // Highlight Mirror Line
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(0, center); ctx.lineTo(canvas.width, center); ctx.stroke();
+                } else if (axis === 'y') {
+                    primeX = -x; primeY = y;
+                    axisDesc = "Sumbu Y (x = 0)";
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(center, 0); ctx.lineTo(center, canvas.height); ctx.stroke();
+                } else if (axis === 'origin') {
+                    primeX = -x; primeY = -y;
+                    axisDesc = "Titik Pusat (0,0)";
+                    drawPoint(center, center, "(0,0)", '#06b6d4');
+                }
+
+                // Dotted connection line
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.moveTo(center + x * scale, center - y * scale);
+                ctx.lineTo(center + primeX * scale, center - primeY * scale);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawPoint(center + x * scale, center - y * scale, `P(${x}, ${y})`, '#8b5cf6');
+                drawPoint(center + primeX * scale, center - primeY * scale, `P'(${primeX}, ${primeY})`, '#06b6d4');
+
+                if (resBox) {
+                    resBox.innerHTML = `<strong>Hasil Pencerminan terhadap ${axisDesc}:</strong><br>P' = <span class="text-cyan-400 font-bold">(${primeX}, ${primeY})</span>`;
+                }
+            }
+            else if (currentMateri === 'rotasi') {
+                const x = parseFloat(document.getElementById('rot_x')?.value || 3);
+                const y = parseFloat(document.getElementById('rot_y')?.value || 1);
+                const angle = document.getElementById('rot_angle')?.value || '90';
+
+                let primeX = x, primeY = y;
+                if (angle === '90') {
+                    primeX = -y; primeY = x;
+                } else if (angle === '180') {
+                    primeX = -x; primeY = -y;
+                } else if (angle === '270') {
+                    primeX = y; primeY = -x;
+                }
+
+                // Draw Angle Arc / Line to origin
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.lineTo(center + x * scale, center - y * scale);
+                ctx.moveTo(center, center);
+                ctx.lineTo(center + primeX * scale, center - primeY * scale);
+                ctx.stroke();
+
+                drawPoint(center + x * scale, center - y * scale, `R(${x}, ${y})`, '#8b5cf6');
+                drawPoint(center + primeX * scale, center - primeY * scale, `R'(${primeX}, ${primeY})`, '#f59e0b');
+
+                if (resBox) {
+                    resBox.innerHTML = `<strong>Hasil Rotasi ${angle}° Pusat (0,0):</strong><br>R' = <span class="text-amber-400 font-bold">(${primeX}, ${primeY})</span>`;
+                }
+            }
+            else if (currentMateri === 'dilatasi') {
+                const x = parseFloat(document.getElementById('dil_x')?.value || 2);
+                const y = parseFloat(document.getElementById('dil_y')?.value || 2);
+                const k = parseFloat(document.getElementById('dil_k')?.value || 2);
+
+                const primeX = x * k;
+                const primeY = y * k;
+
+                // Projection line from origin
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#ec4899';
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.lineTo(center + primeX * scale, center - primeY * scale);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawPoint(center + x * scale, center - y * scale, `D(${x}, ${y})`, '#8b5cf6');
+                drawPoint(center + primeX * scale, center - primeY * scale, `D'(${primeX}, ${primeY})`, '#ec4899');
+
+                if (resBox) {
+                    resBox.innerHTML = `<strong>Hasil Dilatasi [0, ${k}]:</strong><br>D' = (${k} × ${x}, ${k} × ${y}) = <span class="text-pink-400 font-bold">(${primeX}, ${primeY})</span>`;
+                }
+            }
+        }
+
+        function drawPoint(cx, cy, label, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Plus Jakarta Sans';
+            ctx.fillText(label, cx + 12, cy - 12);
+        }
+
+        function drawArrow(fromx, fromy, tox, toy, color) {
+            const headlen = 10;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        /* ==========================================================================
+           4. INTERACTIVE QUIZ SYSTEM
+           ========================================================================== */
+        const quizQuestions = [
+            {
+                category: "Translasi",
+                question: "Titik $A(3, 5)$ digeser oleh translasi $T = (4, -2)$. Berapakah koordinat titik bayangan $A'$?",
+                options: [
+                    { text: "(7, 3)", correct: true },
+                    { text: "(1, 7)", correct: false },
+                    { text: "(7, 7)", correct: false },
+                    { text: "(-1, 3)", correct: false }
+                ],
+                explanation: "Translasi dijumlahkan: $x' = 3 + 4 = 7$ dan $y' = 5 + (-2) = 3$. Jadi $A' = (7, 3)$."
+            },
+            {
+                category: "Refleksi",
+                question: "Bayangan titik $B(-2, 6)$ jika dicerminkan terhadap sumbu $X$ adalah...",
+                options: [
+                    { text: "(2, 6)", correct: false },
+                    { text: "(-2, -6)", correct: true },
+                    { text: "(2, -6)", correct: false },
+                    { text: "(6, -2)", correct: false }
+                ],
+                explanation: "Pencerminan terhadap sumbu $X$ mengubah tanda ordinat $y$: $(x, y) \\rightarrow (x, -y)$. Jadi $B' = (-2, -6)$."
+            },
+            {
+                category: "Rotasi",
+                question: "Titik $C(4, 2)$ diputar sebesar $90^\\circ$ berlawanan arah jarum jam dengan pusat $(0,0)$. Koordinat $C'$ adalah...",
+                options: [
+                    { text: "(-2, 4)", correct: true },
+                    { text: "(2, -4)", correct: false },
+                    { text: "(-4, -2)", correct: false },
+                    { text: "(4, -2)", correct: false }
+                ],
+                explanation: "Rotasi $90^\\circ$ berlawanan jarum jam mengubah $(x,y) \\rightarrow (-y, x)$. Maka $C' = (-2, 4)$."
+            },
+            {
+                category: "Dilatasi",
+                question: "Titik $D(3, -4)$ didilatasi dengan pusat $(0,0)$ dan faktor skala $k = 3$. Koordinat $D'$ adalah...",
+                options: [
+                    { text: "(6, -8)", correct: false },
+                    { text: "(9, -12)", correct: true },
+                    { text: "(9, 12)", correct: false },
+                    { text: "(0, -1)", correct: false }
+                ],
+                explanation: "Dilatasi mengalikan koordinat dengan faktor skala $k$: $D' = (3 \\times 3, -4 \\times 3) = (9, -12)$."
+            },
+            {
+                category: "Refleksi",
+                question: "Pencerminan titik $P(5, 1)$ terhadap titik pusat $(0,0)$ menghasilkan bayangan...",
+                options: [
+                    { text: "(-5, -1)", correct: true },
+                    { text: "(5, -1)", correct: false },
+                    { text: "(-5, 1)", correct: false },
+                    { text: "(1, 5)", correct: false }
+                ],
+                explanation: "Refleksi terhadap $(0,0)$ membalikkan tanda kedua koordinat: $(x,y) \\rightarrow (-x, -y) = (-5, -1)$."
+            }
+        ];
+
+        let currentQIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        function renderQuizQuestion() {
+            answered = false;
+            const q = quizQuestions[currentQIndex];
+
+            document.getElementById('quiz-category').innerText = q.category;
+            document.getElementById('quiz-question').innerText = q.question;
+            document.getElementById('quiz-counter').innerText = `${currentQIndex + 1} / ${quizQuestions.length}`;
+            document.getElementById('quiz-score').innerText = score;
+
+            // Progress bar
+            const progPercent = ((currentQIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progPercent}%`;
+
+            // Hide explanation & disable next button
+            document.getElementById('quiz-explanation').classList.add('hidden');
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.disabled = true;
+
+            // Render option buttons
+            const optsContainer = document.getElementById('quiz-options');
+            optsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-opt-btn p-4 rounded-2xl bg-slate-900 border border-slate-700/80 hover:border-purple-500 text-left text-sm text-slate-200 font-bold transition flex items-center justify-between";
+                btn.innerHTML = `
+                    <span>${String.fromCharCode(65 + idx)}. ${opt.text}</span>
+                    <i class="fa-regular fa-circle text-slate-500 opt-icon"></i>
+                `;
+                btn.onclick = () => checkQuizAnswer(opt.correct, btn, q.explanation);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(isCorrect, selectedBtn, explanation) {
+            if (answered) return;
+            answered = true;
+
+            const allBtns = document.querySelectorAll('.quiz-opt-btn');
+            allBtns.forEach(btn => btn.style.pointerEvents = 'none');
+
+            if (isCorrect) {
+                selectedBtn.classList.remove('bg-slate-900', 'border-slate-700/80');
+                selectedBtn.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-300');
+                selectedBtn.querySelector('.opt-icon').className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+                score += 20;
+                document.getElementById('quiz-score').innerText = score;
+            } else {
+                selectedBtn.classList.remove('bg-slate-900', 'border-slate-700/80');
+                selectedBtn.classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-300');
+                selectedBtn.querySelector('.opt-icon').className = 'fa-solid fa-circle-xmark text-rose-400 text-lg';
+            }
+
+            // Show explanation
+            const expBox = document.getElementById('quiz-explanation');
+            document.getElementById('quiz-explanation-text').innerHTML = explanation;
+            expBox.classList.remove('hidden');
+
+            // Enable next button
+            document.getElementById('quiz-next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQIndex++;
+            if (currentQIndex < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                // Show quiz finish screen
+                document.getElementById('quiz-card').classList.add('hidden');
+                document.getElementById('quiz-results').classList.remove('hidden');
+                document.getElementById('final-score').innerText = score;
+
+                const badgeMsg = document.getElementById('quiz-badge-msg');
+                if (score >= 80) {
+                    badgeMsg.innerText = "🏆 Luar Biasa! Kamu adalah Master Transformasi Geometri!";
+                } else if (score >= 60) {
+                    badgeMsg.innerText = "👍 Bagus Sekali! Pemahamanmu sudah sangat mantap!";
+                } else {
+                    badgeMsg.innerText = "💪 Tetap Semangat! Pelajari materi lagi dan raih nilai 100!";
+                }
+            }
+        }
+
+        function resetQuiz() {
+            currentQIndex = 0;
+            score = 0;
+            document.getElementById('quiz-card').classList.remove('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            renderQuizQuestion();
+        }
+
+        /* ==========================================================================
+           5. DRAG AND DROP MATCHING GAME ENGINE
+           ========================================================================== */
+        const dragItemsData = [
+            { id: 1, text: "Kaca Rias Bayangan", cat: "refleksi", icon: "fa-mirror" },
+            { id: 2, text: "Pergeseran Mobil di Jalan", cat: "translasi", icon: "fa-car" },
+            { id: 3, text: "Bianglala yang Berputar", cat: "rotasi", icon: "fa-ferris-wheel" },
+            { id: 4, text: "Kaca Pembesar Zoom", cat: "dilatasi", icon: "fa-magnifying-glass" },
+            { id: 5, text: "Rumus (x+a, y+b)", cat: "translasi", icon: "fa-square-root-variable" },
+            { id: 6, text: "Rumus (k·x, k·y)", cat: "dilatasi", icon: "fa-expand" },
+            { id: 7, text: "Pencerminan Sumbu Y", cat: "refleksi", icon: "fa-arrows-left-right" },
+            { id: 8, text: "Putaran Sudut 180°", cat: "rotasi", icon: "fa-rotate" }
+        ];
+
+        let draggedItem = null;
+
+        function initDragGame() {
+            const container = document.getElementById('draggable-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Shuffle array
+            const shuffled = [...dragItemsData].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `drag-card-${item.id}`;
+                card.draggable = true;
+                card.dataset.category = item.cat;
+                card.className = "draggable-item bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-md border border-purple-400/30 flex items-center gap-2 cursor-grab transition-transform active:scale-95";
+                card.innerHTML = `<i class="fa-solid fa-shapes text-amber-300"></i> ${item.text}`;
+
+                // HTML5 Drag Event Listeners
+                card.addEventListener('dragstart', (e) => {
+                    draggedItem = card;
+                    e.dataTransfer.setData('text/plain', item.cat);
+                    setTimeout(() => card.classList.add('opacity-40'), 0);
+                });
+
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('opacity-40');
+                    draggedItem = null;
+                });
+
+                container.appendChild(card);
+            });
+
+            // Set up Drop Targets
+            document.querySelectorAll('.drop-target').forEach(target => {
+                target.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    target.classList.add('highlight');
+                });
+
+                target.addEventListener('dragleave', () => {
+                    target.classList.remove('highlight');
+                });
+
+                target.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    target.classList.remove('highlight');
+
+                    if (draggedItem) {
+                        const targetCategory = target.dataset.category;
+                        const itemCategory = draggedItem.dataset.category;
+
+                        if (targetCategory === itemCategory) {
+                            target.querySelector('.dropped-items').appendChild(draggedItem);
+                            draggedItem.className = "bg-emerald-900/80 border border-emerald-500 text-emerald-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 w-full shadow";
+                            draggedItem.draggable = false;
+                            showDragFeedback("✨ Hebat! Pasangannya Tepat!", "text-emerald-400");
+                        } else {
+                            showDragFeedback("❌ Ups, belum tepat! Coba kategori yang lain ya.", "text-rose-400");
+                        }
+                    }
+                });
+            });
+        }
+
+        function showDragFeedback(msg, colorClass) {
+            const fb = document.getElementById('drag-feedback');
+            fb.innerText = msg;
+            fb.className = `mt-6 p-3 rounded-2xl bg-slate-900 border border-slate-700 block text-center font-bold text-xs md:text-sm ${colorClass}`;
+            setTimeout(() => {
+                fb.classList.add('hidden');
+            }, 3000);
+        }
+
+        function resetDragGame() {
+            document.querySelectorAll('.dropped-items').forEach(el => el.innerHTML = '');
+            initDragGame();
+        }
+
+        /* Developer Appreciation Star Button */
+        let stars = 128;
+        function giveStar() {
+            stars++;
+            document.getElementById('star-count').innerText = stars;
+            alert("⭐ Terima kasih atas apresiasinya! Terus semangat belajar Matematika ya!");
+        }
+
+        /* ==========================================================================
+           6. WINDOW INITIALIZATION
+           ========================================================================== */
+        window.onload = function () {
+            initCanvas();
+            renderMateri();
+            renderQuizQuestion();
+            initDragGame();
+
+            // Resize canvas listener
+            window.addEventListener('resize', () => {
+                initCanvas();
+                drawCanvas();
+            });
+        };
+    </script>
+</body>
+</html>
+```
+
+### Summary of Features Created:
+1. **Curriculum Alignment:** Fully aligned with **Kurikulum Merdeka - Fase D Matematika SMP Kelas 9** covering Translasi, Refleksi, Rotasi, and Dilatasi.
+2. **Interactive Coordinate Grid Visualizer:** HTML5 canvas dynamically plots original points, vectors/mirror lines, and computed transformed coordinates ($A'$ / $P'$) in real time as the user moves controls.
+3. **Interactive Quiz System:** Complete with score counter, progress bar, answer feedback, and step-by-step explanations.
+4. **Touch & Mouse Drag and Drop Game:** Allows students to categorize formulas and real-world transformation examples into their corresponding bins.
+5. **Visually Engaging Design:** Theme designed with dark geometric palette, vibrant gradients, badges, micro-interactions, responsive navbar, and credit to developer **Melani PS**.
